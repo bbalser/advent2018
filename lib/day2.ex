@@ -32,8 +32,8 @@ defmodule Day2 do
         y <- ids do
       count_differences(x, y)
     end
-    |> Enum.find(fn {count, _} -> count == 1 end)
-    |> elem(1)
+    |> Enum.find(fn {_, _, count} -> count == 1 end)
+    |> keep_same()
   end
 
   defp count_differences(one, two) do
@@ -42,10 +42,10 @@ defmodule Day2 do
       |> Enum.filter(fn {a, b} -> a != b end)
       |> Enum.count()
 
-    {count, keep_same(one, two)}
+    {one, two, count}
   end
 
-  defp keep_same(one, two) do
+  defp keep_same({one, two, _}) do
     Enum.zip(to_charlist(one), to_charlist(two))
     |> Enum.filter(fn {a, b} -> a == b end)
     |> Enum.map(fn {a, _b} -> a end)
