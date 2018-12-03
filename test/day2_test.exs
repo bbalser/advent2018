@@ -15,4 +15,18 @@ defmodule Day2Tests do
     assert Day2.part_one(input) == 12
   end
 
+  test "part_two should identify prototypes" do
+    input = """
+    abcde
+    fghij
+    klmno
+    pqrst
+    fguij
+    axcye
+    wvxyz
+    """
+
+    assert Day2.part_two(input) == "fgij"
+  end
+
 end
