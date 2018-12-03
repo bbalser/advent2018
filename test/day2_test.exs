@@ -28,5 +28,4 @@ defmodule Day2Tests do
 
     assert Day2.part_two(input) == "fgij"
   end
-
 end

@@ -22,5 +22,4 @@ defmodule Day1Tests do
 
     assert Day1.part_two(input) == 10
   end
-
 end
