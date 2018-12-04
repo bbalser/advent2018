@@ -25,7 +25,8 @@ defmodule Day3 do
   end
 
   defp track_ids_by_coordinates(record, map) do
-    generate_coordinates(record)
+    record
+    |> generate_coordinates()
     |> Enum.reduce(map, fn key, acc ->
       Map.update(acc, key, [record[:id]], &[record[:id] | &1])
     end)
@@ -35,7 +36,7 @@ defmodule Day3 do
     all_records = get_all_records(input)
     collisions = get_collisions(all_records)
 
-    Enum.map(all_records, fn record -> record[:id] end) -- MapSet.to_list(collisions)
+    Enum.map(all_records, fn record -> record[:id] end) -- collisions
   end
 
   defp update_mapset({_key, list}, mapset) do
@@ -43,7 +44,8 @@ defmodule Day3 do
   end
 
   defp get_all_records(input) do
-    String.split(input, ~r/\n/)
+    input
+    |> String.split(~r/\n/)
     |> Enum.filter(&(&1 != ""))
     |> Enum.map(&parse_record/1)
   end
@@ -53,5 +55,6 @@ defmodule Day3 do
     |> Enum.reduce(%{}, &track_ids_by_coordinates/2)
     |> Enum.filter(fn {_k, v} -> Enum.count(v) > 1 end)
     |> Enum.reduce(MapSet.new(), &update_mapset/2)
+    |> MapSet.to_list()
   end
 end
