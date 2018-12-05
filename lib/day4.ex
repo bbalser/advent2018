@@ -1,30 +1,61 @@
 defmodule Day4 do
-
   def part_one(input) do
-    sleep_data = input
+    sleep_data =
+      input
+      |> parse_sleep_data()
+      |> Enum.group_by(fn %{id: id} -> id end)
+
+    sleepiest_guard_id = get_sleepiest_guard(sleep_data)
+    sleepiest_minute = get_sleepiest_minute(sleep_data[sleepiest_guard_id])
+
+    String.to_integer(sleepiest_guard_id) * sleepiest_minute
+  end
+
+  def part_two(input) do
+    {{id, minute}, _records} =
+      parse_sleep_data(input)
+      |> Enum.flat_map(fn %{id: id, start: start, stop: stop} ->
+        Enum.zip(Stream.cycle([id]), start..(stop - 1))
+      end)
+      |> Enum.group_by(fn key -> key end)
+      |> Enum.max_by(fn {_key, list} -> Enum.count(list) end)
+
+    String.to_integer(id) * minute
+  end
+
+  defp parse_sleep_data(input) do
+    input
     |> String.split(~r/\n/)
     |> Enum.filter(&(&1 != ""))
     |> Enum.map(&parse_record/1)
-    |> Enum.sort_by(fn record -> {record["year"], record["month"], record["day"], record["hour"], record["minute"]} end)
+    |> Enum.sort_by(fn record ->
+      {record["year"], record["month"], record["day"], record["hour"], record["minute"]}
+    end)
     |> Enum.chunk_while([], &chunk_function/2, &after_function/1)
     |> Enum.map(&assign_ids/1)
     |> Enum.map(&convert_to_sleep_records/1)
     |> List.flatten()
-    |> Enum.group_by(fn %{id: id} -> id end)
+  end
 
-    {sleepiest_id, _total_hours_slept} = sleep_data
-    |> Enum.map(fn {id, records} -> {id, total_and_sum(records)} end)
-    |> Enum.max_by(fn {id, total} -> total end)
+  defp get_sleepiest_guard(sleep_data) do
+    {id, _total_hours_slept} =
+      sleep_data
+      |> Enum.map(fn {id, records} -> {id, total_and_sum(records)} end)
+      |> Enum.max_by(fn {_id, total} -> total end)
 
-    {sleepiest_minute, _total_times_slept_in_minute} = sleep_data[sleepiest_id]
-    |> Enum.reduce(%{}, fn %{start: start, stop: stop}, acc ->
-      Enum.reduce(start..(stop-1), acc, fn minute, acc2 ->
-        Map.update(acc2, minute, 1, &(&1+1))
+    id
+  end
+
+  defp get_sleepiest_minute(guard_records) do
+    {minute, _} =
+      guard_records
+      |> Enum.flat_map(fn %{start: start, stop: stop} ->
+        Enum.to_list(start..(stop - 1))
       end)
-    end)
-    |> Enum.max_by(fn {minute, total} -> total end)
+      |> Enum.group_by(fn minute -> minute end)
+      |> Enum.max_by(fn {_minute, list} -> Enum.count(list) end)
 
-    String.to_integer(sleepiest_id) * sleepiest_minute
+    minute
   end
 
   defp parse_record(line) do
@@ -42,7 +73,12 @@ defmodule Day4 do
   defp after_function(acc), do: {:cont, Enum.reverse(acc), []}
 
   defp assign_ids(day_record) do
-    id = Regex.named_captures(~r/Guard #(?<id>\d+)\sbegins shift/, Map.get(hd(day_record), "message"))["id"]
+    id =
+      Regex.named_captures(
+        ~r/Guard #(?<id>\d+)\sbegins shift/,
+        Map.get(hd(day_record), "message")
+      )["id"]
+
     Enum.map(day_record, fn entry -> Map.put(entry, "id", id) end)
   end
 
@@ -50,7 +86,7 @@ defmodule Day4 do
     Enum.reduce(day_record, [], fn next, acc ->
       case next["message"] do
         "falls asleep" -> [%{id: next["id"], start: String.to_integer(next["minute"])} | acc]
-        "wakes up" -> [ Map.put(hd(acc), :stop, String.to_integer(next["minute"])) | tl(acc)]
+        "wakes up" -> [Map.put(hd(acc), :stop, String.to_integer(next["minute"])) | tl(acc)]
         _ -> acc
       end
     end)
@@ -58,9 +94,7 @@ defmodule Day4 do
 
   defp total_and_sum(records) do
     records
-    |> Enum.map(fn %{stop: stop, start: start} -> stop-start end)
+    |> Enum.map(fn %{stop: stop, start: start} -> stop - start end)
     |> Enum.sum()
   end
-
-
 end
