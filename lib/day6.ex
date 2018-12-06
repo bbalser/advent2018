@@ -66,4 +66,22 @@ defmodule Day6 do
   defp manhatten_distance({x1, y1}, {x2, y2}) do
     abs(x1 - x2) + abs(y1 - y2)
   end
+
+  def part_two(input) do
+    coordinates = parse_coordinates(input)
+    ranges = calculate_ranges(coordinates)
+
+    for x <- ranges[:min_x]..ranges[:max_x],
+      y <- ranges[:min_y]..ranges[:max_y] do
+        {x, y}
+    end
+    |> Enum.map(fn {x, y} ->
+
+      Enum.map(coordinates, fn {cx, cy} -> manhatten_distance({x, y}, {cx, cy}) end)
+      |> Enum.sum()
+
+    end)
+    |> Enum.filter(fn x -> x < 10000 end)
+    |> Enum.count()
+  end
 end
