@@ -67,6 +67,7 @@ defmodule Day7 do
   end
 
   defp run_out_time(_workers, time, true = _all_done), do: time
+
   defp run_out_time(workers, time, false) do
     new_workers = Enum.map(workers, fn {s, tleft} -> {s, max(0, tleft - 1)} end)
     run_out_time(new_workers, time + 1, all_done?(new_workers))
@@ -86,7 +87,6 @@ defmodule Day7 do
       |> Enum.sort()
       |> Enum.reverse()
       |> Enum.reduce({steps, []}, fn {step, time_left}, {remaining_steps, w_list} ->
-
         case time_left == 0 do
           false ->
             {remaining_steps, [{step, time_left - 1} | w_list]}
