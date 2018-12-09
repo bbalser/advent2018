@@ -72,14 +72,12 @@ defmodule Day6 do
     ranges = calculate_ranges(coordinates)
 
     for x <- ranges[:min_x]..ranges[:max_x],
-      y <- ranges[:min_y]..ranges[:max_y] do
-        {x, y}
+        y <- ranges[:min_y]..ranges[:max_y] do
+      {x, y}
     end
     |> Enum.map(fn {x, y} ->
-
       Enum.map(coordinates, fn {cx, cy} -> manhatten_distance({x, y}, {cx, cy}) end)
       |> Enum.sum()
-
     end)
     |> Enum.filter(fn x -> x < 10000 end)
     |> Enum.count()

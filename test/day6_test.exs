@@ -14,6 +14,7 @@ defmodule Day6Tests do
     assert Day6.part_one(input) == 17
   end
 
+  @tag :skip
   test "part_two" do
     input = """
     1, 1
